@@ -1,15 +1,17 @@
 import os
-from linkedin_scraper import Person, actions
+import sys
+sys.path.append('../')
+from linkedin_scraper_self import Person, actions
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
 chrome_options = Options()
 chrome_options.add_argument("--headless")
-driver = webdriver.Chrome("./chromedriver", options=chrome_options)
+driver = webdriver.Chrome("/usr/local/bin/chromedriver", options=chrome_options)
 
 email = os.getenv("LINKEDIN_USER")
 password = os.getenv("LINKEDIN_PASSWORD")
-actions.login(driver, email, password) # if email and password isnt given, it'll prompt in terminal
+actions.login(driver, "13544189821", "p7328294984") # if email and password isnt given, it'll prompt in terminal
 person = Person("https://www.linkedin.com/in/adrian0350", contacts=[], driver=driver)
 
 print("Person: " + person.name)
