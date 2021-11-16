@@ -308,6 +308,24 @@ class Person(Scraper):
                     name = conn.find_element_by_class_name("mn-connection-card__details").find_element_by_class_name("mn-connection-card__name").text.strip()
                     occupation = conn.find_element_by_class_name("mn-connection-card__details").find_element_by_class_name("mn-connection-card__occupation").text.strip()
 
+                    info_url = url + "detail/contact-info/"
+                    driver.get(info_url)
+                    _ = WebDriverWait(driver, self.__WAIT_FOR_ELEMENT_TIMEOUT).until(
+                        EC.presence_of_all_elements_located((By.CLASS_NAME, "artdeco-modal"))
+                    )
+                    contact_info = driver.find_element_by_class_name("artdeco-modal")
+
+                    for info in contact_info.find_elements_by_class_name("pv-contact-info__ci-container"):
+                        anchor_test = info.find_element_by_class_name("pv-contact-info__contact-link")
+                        if anchor_test is not None:
+                            url_test = anchor_test.get_attribute("href")
+                            print(".....~" + url_test)
+                        anchor_test = info.find_element_by_class_name("pv-contact-info__contact-item")
+                        if anchor_test is not None:
+                            attr = anchor_test.text.strip()
+                            print("....."+attr)
+
+                    #pv-contact-info__ci-container
                     contact = Contact(name=name, occupation=occupation, url=url)
                     self.add_contact(contact)
         except:
