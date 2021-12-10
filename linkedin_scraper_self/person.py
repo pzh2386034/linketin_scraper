@@ -314,16 +314,37 @@ class Person(Scraper):
                         EC.presence_of_all_elements_located((By.CLASS_NAME, "artdeco-modal"))
                     )
                     contact_info = driver.find_element_by_class_name("artdeco-modal")
-
-                    for info in contact_info.find_elements_by_class_name("pv-contact-info__ci-container"):
-                        anchor_test = info.find_element_by_class_name("pv-contact-info__contact-link")
-                        if anchor_test is not None:
-                            url_test = anchor_test.get_attribute("href")
-                            print(".....~" + url_test)
-                        anchor_test = info.find_element_by_class_name("pv-contact-info__contact-item")
-                        if anchor_test is not None:
-                            attr = anchor_test.text.strip()
-                            print("....."+attr)
+                    
+                    detail_info = contact_info.find_elements_by_class_name("pv-contact-info__contact-type")
+                    #detail_info = contact_info.find_elements_by_class_name("pv-contact-info__ci-container")
+                    print(len(detail_info))
+                    for info in detail_info:
+                        header = info.find_element_by_class_name("pv-contact-info__header").text.strip()
+                        print(header)
+                        if "Profile" in header:
+                            detail = info.find_element_by_class_name("pv-contact-info__ci-container")
+                            link = detail.find_element_by_class_name("pv-contact-info__contact-link")
+                            url_test = link.get_attribute("href")
+                            print(header + ":" +url_test)
+                        elif header == "Phone" or header == "IM":
+                            elements = info.find_elements_by_class_name("pv-contact-info__ci-container")
+                            for detail in elements:
+                                if detail.tag_name == "li":
+                                    ss = info.find_elements_by_tag_name("span") # findElements(By.tagName("span"))
+                                    print(header + ":" +ss[0].text.strip()+ss[1].text.strip())
+                        elif header == "Email":
+                            detail = info.find_element_by_class_name("pv-contact-info__ci-container")
+                            link = detail.find_element_by_class_name("pv-contact-info__contact-link")
+                            url_test = link.get_attribute("href")
+                            print(header + ":" +url_test)
+                        
+                        elif header == "Birthday" or header == "Connected" :
+                            detail = info.find_element_by_class_name("pv-contact-info__ci-container")
+                            item = detail.find_element_by_class_name("pv-contact-info__contact-item")
+                            txt = item.text.strip()
+                            print(header + ":" +txt)
+                        else: 
+                            print("NO DEAL:" + header)
 
                     #pv-contact-info__ci-container
                     contact = Contact(name=name, occupation=occupation, url=url)
