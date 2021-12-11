@@ -301,11 +301,19 @@ class Person(Scraper):
             _ = WebDriverWait(driver, self.__WAIT_FOR_ELEMENT_TIMEOUT).until(
                 EC.presence_of_element_located((By.CLASS_NAME, "mn-connections"))
             )
+            driver.maximize_window()
             counts_connection = len(driver.find_elements_by_class_name("mn-connection-card"))
             log = "begin to get connections, num:%d" %(counts_connection)
             print(log)
-            for i in range(counts_connection):
-                print(i)
+            for i in range(0, counts_connection, 4):
+                if ( (i >= 35) ):
+                    print("need to scroll......")
+                    js = 'window.scrollTo(0,%s)'%(100*100)
+                    driver.execute_script(js)
+                    time.sleep(1)
+                    counts_connection = len(driver.find_elements_by_class_name("mn-connection-card"))
+                log = "num:%d, total:%d" %(i, counts_connection)
+                print(log)
                 connections = driver.find_elements_by_xpath('//a[@class="ember-view mn-connection-card__link"]')
                 connections[i].click()
                 #time.sleep(2)
@@ -322,7 +330,7 @@ class Person(Scraper):
                 name = driver.find_element_by_id("pv-contact-info").text.strip()
                 print(name)
 
-                
+
                 detail_info = driver.find_elements_by_class_name("pv-contact-info__contact-type")
 
                 #detail_info = contact_info.find_elements_by_class_name("pv-contact-info__ci-container")
@@ -346,26 +354,27 @@ class Person(Scraper):
                             link = detail.find_element_by_class_name("pv-contact-info__contact-link")
                             url_test = link.get_attribute("href")
                             print(header + ":" +url_test)
-                        
+
                         elif header == "Birthday" or header == "Connected" :
                             detail = info.find_element_by_class_name("pv-contact-info__ci-container")
                             item = detail.find_element_by_class_name("pv-contact-info__contact-item")
                             txt = item.text.strip()
                             print(header + ":" +txt)
-                        else: 
+                        else:
                             print("NO DEAL:" + header)
 
                 load_detail(detail_info)
                 driver.back()
                 time.sleep(2)
-                print(driver.current_url)
+                #print(driver.current_url)
                 driver.back()
                 time.sleep(2)
-                print(driver.current_url)
+                #print(driver.current_url)
+                counts_connection = len(driver.find_elements_by_class_name("mn-connection-card"))
                 #pv-contact-info__ci-container
                 #contact = Contact(name=name, occupation=occupation, url=url)
                 #self.add_contact(contact)
-    
+
         except Exception as e:
             print("exception!!!!!!!!!!!!" + e)
 
