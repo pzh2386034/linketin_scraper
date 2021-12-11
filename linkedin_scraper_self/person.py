@@ -101,6 +101,7 @@ class Person(Scraper):
         except Exception as e:
             pass
 
+
     def scrape_logged_in(self, close_on_complete=True):
         driver = self.driver
         duration = None
@@ -301,19 +302,38 @@ class Person(Scraper):
             _ = WebDriverWait(driver, self.__WAIT_FOR_ELEMENT_TIMEOUT).until(
                 EC.presence_of_element_located((By.CLASS_NAME, "mn-connections"))
             )
-            driver.maximize_window()
-            counts_connection = len(driver.find_elements_by_class_name("mn-connection-card"))
-            log = "begin to get connections, num:%d" %(counts_connection)
-            print(log)
-            for i in range(0, counts_connection, 4):
-                if ( (i >= 35) ):
-                    print("need to scroll......")
+            def see_more_connector():
+                try:
+                    show_click = driver.find_element_by_xpath('//button//span[text()="Show more results"]')
+                    print("show more results click.............")
+                    show_click.click()
+                except:
                     js = 'window.scrollTo(0,%s)'%(100*100)
                     driver.execute_script(js)
                     time.sleep(1)
-                    counts_connection = len(driver.find_elements_by_class_name("mn-connection-card"))
-                log = "num:%d, total:%d" %(i, counts_connection)
-                print(log)
+                tmp = len(driver.find_elements_by_class_name("mn-connection-card"))
+                print("scroll to num:%d" %(tmp))
+                return tmp
+
+            header = driver.find_element_by_xpath('//header[@class="mn-connections__header"]')
+            total_conn_str = header.find_element_by_tag_name("h1").text.strip()
+            num_array = total_conn_str.split(' ')
+            num = num_array[0]
+            total_conn = int(num.replace(',', ''))
+
+            driver.maximize_window()
+            global counts_connection
+            counts_connection= len(driver.find_elements_by_class_name("mn-connection-card"))
+            print("begin to get connections, num:%d, total_num:%d" %(counts_connection, total_conn))
+            i = 0
+
+            while (True):
+                if ( (i >= counts_connection - 3) and counts_connection != total_conn):
+                    print("need to scroll......")
+                    counts_connection = see_more_connector()
+                print("num:%d, counts_connection:%d, total:%d" %(i, counts_connection, total_conn))
+                if (i >= counts_connection):
+                    break
                 connections = driver.find_elements_by_xpath('//a[@class="ember-view mn-connection-card__link"]')
                 connections[i].click()
                 #time.sleep(2)
@@ -369,6 +389,10 @@ class Person(Scraper):
                 #print(driver.current_url)
                 driver.back()
                 time.sleep(2)
+                if (i < 32):
+                    i = i+6
+                else:
+                    i = i+3
                 #print(driver.current_url)
                 counts_connection = len(driver.find_elements_by_class_name("mn-connection-card"))
                 #pv-contact-info__ci-container
