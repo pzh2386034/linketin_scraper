@@ -6,12 +6,13 @@ from selenium.webdriver.support import expected_conditions as EC
 from .objects import Experience, Education, Scraper, Interest, Accomplishment, Contact
 import os
 from linkedin_scraper import selectors
-
+import time
+import json
 
 class Person(Scraper):
 
     __TOP_CARD = "pv-top-card"
-    __WAIT_FOR_ELEMENT_TIMEOUT = 5
+    __WAIT_FOR_ELEMENT_TIMEOUT = 10
 
     def __init__(
         self,
@@ -300,27 +301,35 @@ class Person(Scraper):
             _ = WebDriverWait(driver, self.__WAIT_FOR_ELEMENT_TIMEOUT).until(
                 EC.presence_of_element_located((By.CLASS_NAME, "mn-connections"))
             )
-            connections = driver.find_element_by_class_name("mn-connections")
-            if connections is not None:
-                for conn in connections.find_elements_by_class_name("mn-connection-card"):
-                    anchor = conn.find_element_by_class_name("mn-connection-card__link")
-                    url = anchor.get_attribute("href")
-                    name = conn.find_element_by_class_name("mn-connection-card__details").find_element_by_class_name("mn-connection-card__name").text.strip()
-                    occupation = conn.find_element_by_class_name("mn-connection-card__details").find_element_by_class_name("mn-connection-card__occupation").text.strip()
+            counts_connection = len(driver.find_elements_by_class_name("mn-connection-card"))
+            log = "begin to get connections, num:%d" %(counts_connection)
+            print(log)
+            for i in range(counts_connection):
+                print(i)
+                connections = driver.find_elements_by_xpath('//a[@class="ember-view mn-connection-card__link"]')
+                connections[i].click()
+                #time.sleep(2)
+                #name = driver.find_element_by_xpath('//div//h1[contains(@class, "text-heading-xlarge")]').text.strip()
+                _ = WebDriverWait(driver, self.__WAIT_FOR_ELEMENT_TIMEOUT).until(
+                    EC.presence_of_all_elements_located((By.XPATH, '//a[text()="Contact info"]'))
+                )
+                #print(name)
+                driver.find_element_by_xpath('//a[text()="Contact info"]').click()
+                #time.sleep(2)
+                _ = WebDriverWait(driver, self.__WAIT_FOR_ELEMENT_TIMEOUT).until(
+                    EC.presence_of_all_elements_located((By.ID, "pv-contact-info"))
+                )
+                name = driver.find_element_by_id("pv-contact-info").text.strip()
+                print(name)
 
-                    info_url = url + "detail/contact-info/"
-                    driver.get(info_url)
-                    _ = WebDriverWait(driver, self.__WAIT_FOR_ELEMENT_TIMEOUT).until(
-                        EC.presence_of_all_elements_located((By.CLASS_NAME, "artdeco-modal"))
-                    )
-                    contact_info = driver.find_element_by_class_name("artdeco-modal")
-                    
-                    detail_info = contact_info.find_elements_by_class_name("pv-contact-info__contact-type")
-                    #detail_info = contact_info.find_elements_by_class_name("pv-contact-info__ci-container")
-                    print(len(detail_info))
+                
+                detail_info = driver.find_elements_by_class_name("pv-contact-info__contact-type")
+
+                #detail_info = contact_info.find_elements_by_class_name("pv-contact-info__ci-container")
+                def load_detail(detail_info):
                     for info in detail_info:
                         header = info.find_element_by_class_name("pv-contact-info__header").text.strip()
-                        print(header)
+                        #print(header)
                         if "Profile" in header:
                             detail = info.find_element_by_class_name("pv-contact-info__ci-container")
                             link = detail.find_element_by_class_name("pv-contact-info__contact-link")
@@ -346,11 +355,19 @@ class Person(Scraper):
                         else: 
                             print("NO DEAL:" + header)
 
-                    #pv-contact-info__ci-container
-                    contact = Contact(name=name, occupation=occupation, url=url)
-                    self.add_contact(contact)
-        except:
-            connections = None
+                load_detail(detail_info)
+                driver.back()
+                time.sleep(2)
+                print(driver.current_url)
+                driver.back()
+                time.sleep(2)
+                print(driver.current_url)
+                #pv-contact-info__ci-container
+                #contact = Contact(name=name, occupation=occupation, url=url)
+                #self.add_contact(contact)
+    
+        except Exception as e:
+            print("exception!!!!!!!!!!!!" + e)
 
         if close_on_complete:
             driver.quit()
