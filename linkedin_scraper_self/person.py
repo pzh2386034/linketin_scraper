@@ -102,6 +102,126 @@ class Person(Scraper):
             pass
 
 
+
+    def getExperience(self):
+                # get experience
+        driver = self.driver
+        works = []
+        driver.execute_script(
+            "window.scrollTo(0, Math.ceil(document.body.scrollHeight*3/5));"
+        )
+
+        ## Click SEE MORE
+        self._click_see_more_by_class_name("pv-experience-section__see-more")
+        time.sleep(1)
+        # try:
+        #     _ = WebDriverWait(driver, self.__WAIT_FOR_ELEMENT_TIMEOUT).until(
+        #         EC.presence_of_element_located((By.ID, "experience-section"))
+        #     )
+
+        # except:
+        #     exp = None
+        exp = driver.find_element_by_id("experience-section")
+
+        if exp is not None:
+            for position in exp.find_elements_by_class_name("pv-position-entity"):
+                position_title = position.find_element_by_tag_name("h3").text.strip()
+
+                try:
+                    company = position.find_elements_by_tag_name("p")[1].text.strip()
+                except:
+                    company = None
+                try:
+                    times = str(
+                        position.find_elements_by_tag_name("h4")[0]
+                        .find_elements_by_tag_name("span")[1]
+                        .text.strip()
+                    )
+                    from_date = " ".join(times.split(" ")[:2])
+                    to_date = " ".join(times.split(" ")[3:])
+                except:
+                    from_date = None
+                    to_date = None
+                try:
+                    duration = (
+                        position.find_elements_by_tag_name("h4")[1]
+                        .find_elements_by_tag_name("span")[1]
+                        .text.strip()
+                    )
+                except:
+                    duration = None
+                try:
+                    location = (
+                        position.find_elements_by_tag_name("h4")[2]
+                        .find_elements_by_tag_name("span")[1]
+                        .text.strip()
+                    )
+                except:
+                    location = None
+
+                experience = Experience(
+                    position_title=position_title,
+                    from_date=from_date,
+                    to_date=to_date,
+                    duration=duration,
+                    location=location,
+                    company_name=company,
+                )
+                works.append(experience)
+        return works
+
+    def getEducation(self):
+        # get education
+        ## Click SEE MORE
+        driver = self.driver
+        schools = []
+        self._click_see_more_by_class_name("pv-education-section__see-more")
+        # try:
+        #     _ = WebDriverWait(driver, self.__WAIT_FOR_ELEMENT_TIMEOUT).until(
+        #         EC.presence_of_element_located((By.ID, "education-section"))
+        #     )
+
+        # except:
+        #     print("none education@@@@@")
+        #     edu = None
+        time.sleep(1)
+        edu = driver.find_element_by_id("education-section")
+        if edu:
+            for school in edu.find_elements_by_class_name("pv-profile-section__list-item"):
+                university = school.find_element_by_class_name("pv-entity__school-name").text.strip()
+                print("university:" + university)
+                try:
+                    degree = (
+                        school.find_element_by_class_name("pv-entity__degree-name")
+                        .find_elements_by_tag_name("span")[1]
+                        .text.strip()
+                    )
+                except:
+                    print("none degree@@@@@")
+                    degree = None
+                try:
+                    times = (
+                        school.find_element_by_class_name("pv-entity__dates")
+                        .find_elements_by_tag_name("span")[1]
+                        .text.strip()
+                    )
+                    from_date, to_date = (times.split(" ")[0], times.split(" ")[2])
+                except:
+                    print("none times@@@@@")
+                    from_date, to_date = (None, None)
+                education = Education(
+                    from_date=from_date,
+                    to_date=to_date,
+                    degree=degree,
+                    school_name=university,
+                )
+                #education.institution_name = university
+                #self.add_education(education)
+                schools.append(education)
+        return schools
+
+
+
     def scrape_logged_in(self, close_on_complete=True):
         driver = self.driver
         duration = None
