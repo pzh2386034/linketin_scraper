@@ -31,6 +31,7 @@ class Experience(Institution):
     position_title: str = None
     duration: str = None
     location: str = None
+    company_name: str = None
 
 
 @dataclass
@@ -39,6 +40,7 @@ class Education(Institution):
     to_date: str = None
     description: str = None
     degree: str = None
+    school_name: str = None
 
 
 @dataclass
