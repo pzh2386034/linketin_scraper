@@ -360,12 +360,15 @@ class Person(Scraper):
                     break
                 connections = driver.find_elements_by_xpath('//a[@class="ember-view mn-connection-card__link"]')
 
-                connections[i].click()
+                url = connections[i]
+                print("===============url==============:"+url.get_attribute("href"))
+                url.click()
                 #time.sleep(2)
                 #name = driver.find_element_by_xpath('//div//h1[contains(@class, "text-heading-xlarge")]').text.strip()
-                _ = WebDriverWait(driver, self.__WAIT_FOR_ELEMENT_TIMEOUT).until(
-                    EC.presence_of_all_elements_located((By.ID, "experience-section"))
-                )
+                # _ = WebDriverWait(driver, self.__WAIT_FOR_ELEMENT_TIMEOUT).until(
+                #     EC.presence_of_all_elements_located((By.ID, "experience-section"))
+                # )
+                time.sleep(2)
                 experiences = self.getExperience()
                 print("GET Experiences:%d" % ( len(experiences) ) )
                 educations = self.getEducation()
