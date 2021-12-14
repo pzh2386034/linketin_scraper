@@ -364,25 +364,33 @@ class Person(Scraper):
                 print("===============url==============:"+url.get_attribute("href"))
                 url.click()
                 #time.sleep(2)
-                #name = driver.find_element_by_xpath('//div//h1[contains(@class, "text-heading-xlarge")]').text.strip()
-                # _ = WebDriverWait(driver, self.__WAIT_FOR_ELEMENT_TIMEOUT).until(
-                #     EC.presence_of_all_elements_located((By.ID, "experience-section"))
-                # )
-                time.sleep(2)
-                experiences = self.getExperience()
-                print("GET Experiences:%d" % ( len(experiences) ) )
-                educations = self.getEducation()
-                print("GET Educations:%d" % ( len(educations)  ))
+                try:
+                    #name = driver.find_element_by_xpath('//div//h1[contains(@class, "text-heading-xlarge")]').text.strip()
+                    _ = WebDriverWait(driver, self.__WAIT_FOR_ELEMENT_TIMEOUT).until(
+                        EC.presence_of_all_elements_located((By.ID, "experience-section"))
+                    )
+                    # time.sleep(2)
+                    experiences = self.getExperience()
+                    print("GET Experiences:%d" % ( len(experiences) ) )
+                    educations = self.getEducation()
+                    print("GET Educations:%d" % ( len(educations)  ))
+                except:
+                    print("GET Experiences,Educations for " )
+                    pass
+
                 #print(name)
-                driver.execute_script("window.scrollTo(0, 0);")
+                driver.execute_script("window.scrollTo(0, 0);") #回到页面顶端
                 # element = driver.find_element_by_xpath('//a[text()="Contact info"]')
                 # driver.execute_script("arguments[0].scrollIntoView();", element)
-
-                driver.find_element_by_xpath('//a[text()="Contact info"]').click()
-                #time.sleep(2)
-                _ = WebDriverWait(driver, self.__WAIT_FOR_ELEMENT_TIMEOUT).until(
-                    EC.presence_of_all_elements_located((By.ID, "pv-contact-info"))
-                )
+                try:
+                    driver.find_element_by_xpath('//a[text()="Contact info"]').click()
+                    _ = WebDriverWait(driver, self.__WAIT_FOR_ELEMENT_TIMEOUT).until(
+                        EC.presence_of_all_elements_located((By.ID, "pv-contact-info"))
+                    )
+                except:
+                    print("GET Contact info failed, RETRY")
+                    continue
+                
                 name = driver.find_element_by_id("pv-contact-info").text.strip()
                 print(name)
 
